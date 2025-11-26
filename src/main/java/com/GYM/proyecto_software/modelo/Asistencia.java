@@ -18,6 +18,7 @@ public class Asistencia {
 
     private LocalDateTime salida;
 
+    private String estado;
 
     @ManyToOne
     @JoinColumn(name = "id_cliente", nullable = false)
