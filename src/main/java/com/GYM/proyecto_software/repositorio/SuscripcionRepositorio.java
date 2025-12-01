@@ -8,6 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface SuscripcionRepositorio extends JpaRepository<Suscripcion, Long> {
-    // Buscar si el cliente ya tiene una suscripción activa
     Optional<Suscripcion> findByClienteAndEstado(Cliente cliente, String estado);
 }
