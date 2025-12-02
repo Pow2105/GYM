@@ -1,5 +1,6 @@
 package com.GYM.proyecto_software.patrones.strategy;
 
+import com.GYM.proyecto_software.dto.PagoRequerido;
 import com.GYM.proyecto_software.modelo.Cliente;
 import com.GYM.proyecto_software.modelo.Pago;
 import com.GYM.proyecto_software.repositorio.ClienteRepositorio;
@@ -13,8 +14,8 @@ public class PagoDiarioStrategy implements PagoStrategy {
     private ClienteRepositorio clienteRepositorio;
 
     @Override
-    public void procesarPago(Pago pago, Cliente cliente) {
-        // Lógica simple: Solo actualizamos el estado del cliente para hoy
+    public void procesarPago(Pago pago, Cliente cliente, PagoRequerido request) {
+
         cliente.setTipoCliente("DIARIO");
         clienteRepositorio.save(cliente);
     }

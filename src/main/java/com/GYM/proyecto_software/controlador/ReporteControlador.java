@@ -20,7 +20,7 @@ public class ReporteControlador {
 
     @GetMapping("/dashboard")
     public ResponseEntity<Map<String, Object>> verDashboard() {
-        // El controlador no sabe de dónde salen los datos, solo llama a la fachada
+
         return ResponseEntity.ok(reporteFacade.obtenerReporteGeneral());
     }
 }

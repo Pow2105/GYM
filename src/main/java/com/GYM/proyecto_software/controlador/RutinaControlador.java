@@ -24,4 +24,18 @@ public class RutinaControlador {
     public List<Rutina> getRutinasPorCliente(@PathVariable Long idCliente) {
         return rutinaRepositorio.findByCliente_IdCliente(idCliente);
     }
+
+    @PutMapping("/{id}")
+    public Rutina actualizarRutina(@PathVariable Long id, @RequestBody Rutina detallesRutina) {
+        return rutinaRepositorio.findById(id)
+                .map(rutina -> {
+                    rutina.setDescripcion(detallesRutina.getDescripcion());
+                    // Podríamos actualizar también el entrenador si cambió
+                    if(detallesRutina.getEntrenador() != null) {
+                        rutina.setEntrenador(detallesRutina.getEntrenador());
+                    }
+                    return rutinaRepositorio.save(rutina);
+                })
+                .orElseThrow(() -> new RuntimeException("Rutina no encontrada con id " + id));
+    }
 }

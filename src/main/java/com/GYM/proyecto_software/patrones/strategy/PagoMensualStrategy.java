@@ -1,5 +1,6 @@
 package com.GYM.proyecto_software.patrones.strategy;
 
+import com.GYM.proyecto_software.dto.PagoRequerido;
 import com.GYM.proyecto_software.modelo.Cliente;
 import com.GYM.proyecto_software.modelo.Pago;
 import com.GYM.proyecto_software.modelo.Suscripcion;
@@ -20,21 +21,16 @@ public class PagoMensualStrategy implements PagoStrategy {
     private ClienteRepositorio clienteRepositorio;
 
     @Override
-    public void procesarPago(Pago pago, Cliente cliente) {
-        // 1. Crear Suscripción de 30 días
+    public void procesarPago(Pago pago, Cliente cliente, PagoRequerido request) {
         Suscripcion suscripcion = new Suscripcion();
         suscripcion.setCliente(cliente);
         suscripcion.setFechaInicio(LocalDate.now());
         suscripcion.setFechaFin(LocalDate.now().plusDays(30));
         suscripcion.setEstado("ACTIVA");
-
-        // Guardamos la suscripción
         suscripcion = suscripcionRepositorio.save(suscripcion);
 
-        // 2. Vincular el pago a la suscripción
         pago.setSuscripcion(suscripcion);
 
-        // 3. Actualizar estatus del cliente
         cliente.setTipoCliente("SUSCRIPTOR");
         clienteRepositorio.save(cliente);
     }

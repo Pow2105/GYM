@@ -45,7 +45,7 @@ public class PagoControlador {
 
         PagoStrategy estrategia = strategyFactory.obtenerEstrategia(request.getConcepto());
 
-        estrategia.procesarPago(pago, cliente);
+        estrategia.procesarPago(pago, cliente, request);
 
         return pagoRepositorio.save(pago);
     }

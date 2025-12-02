@@ -8,4 +8,6 @@ public class PagoRequerido {
     private Long idCliente;
     private BigDecimal monto;
     private String concepto;
+
+    private Long idMaquina;
 }
