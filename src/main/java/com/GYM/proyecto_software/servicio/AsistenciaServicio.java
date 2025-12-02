@@ -2,9 +2,11 @@ package com.GYM.proyecto_software.servicio;
 
 import com.GYM.proyecto_software.modelo.Asistencia;
 import com.GYM.proyecto_software.modelo.Cliente;
+import com.GYM.proyecto_software.patrones.observer.CambioOcupacionEvento;
 import com.GYM.proyecto_software.repositorio.AsistenciaRepositorio;
 import com.GYM.proyecto_software.repositorio.ClienteRepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,31 +21,43 @@ public class AsistenciaServicio {
     @Autowired
     private AsistenciaRepositorio asistenciaRepositorio;
 
-    public Asistencia registrarAcceso(String qrCode) {
+    @Autowired
+    private ApplicationEventPublisher eventPublisher; // Para publicar eventos (Observer)
 
+    public Asistencia registrarAcceso(String qrCode) {
+        // 1. Buscar al cliente
         Cliente cliente = clienteRepositorio.findByQrCode(qrCode)
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado con ese código QR"));
 
-
+        // 2. Lógica de Entrada/Salida
         Optional<Asistencia> ultimaAsistenciaOpt = asistenciaRepositorio.findTopByClienteOrderByEntradaDesc(cliente);
+        Asistencia asistenciaGuardada;
+        String movimiento;
 
-        if (ultimaAsistenciaOpt.isPresent()) {
+        if (ultimaAsistenciaOpt.isPresent() && ultimaAsistenciaOpt.get().getSalida() == null) {
+            // Es SALIDA
             Asistencia ultima = ultimaAsistenciaOpt.get();
-
-
-            if (ultima.getSalida() == null) {
-                ultima.setSalida(LocalDateTime.now());
-                ultima.setEstado("FUERA");
-                return asistenciaRepositorio.save(ultima);
-            }
+            ultima.setSalida(LocalDateTime.now());
+            ultima.setEstado("FUERA");
+            asistenciaGuardada = asistenciaRepositorio.save(ultima);
+            movimiento = "SALIDA";
+        } else {
+            // Es ENTRADA
+            Asistencia nueva = new Asistencia();
+            nueva.setCliente(cliente);
+            nueva.setEntrada(LocalDateTime.now());
+            nueva.setEstado("DENTRO");
+            asistenciaGuardada = asistenciaRepositorio.save(nueva);
+            movimiento = "ENTRADA";
         }
 
+        // 3. PATRÓN OBSERVER: Notificar el cambio
+        // Calculamos cuántos hay "DENTRO" ahora mismo
+        int ocupacionActual = (int) asistenciaRepositorio.countByEstado("DENTRO");
 
-        Asistencia nuevaAsistencia = new Asistencia();
-        nuevaAsistencia.setCliente(cliente);
-        nuevaAsistencia.setEntrada(LocalDateTime.now());
-        nuevaAsistencia.setEstado("DENTRO");
+        // Disparamos el evento
+        eventPublisher.publishEvent(new CambioOcupacionEvento(this, movimiento, ocupacionActual));
 
-        return asistenciaRepositorio.save(nuevaAsistencia);
+        return asistenciaGuardada;
     }
 }

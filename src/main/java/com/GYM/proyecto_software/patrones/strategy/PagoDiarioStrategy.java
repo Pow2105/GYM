@@ -14,7 +14,7 @@ public class PagoDiarioStrategy implements PagoStrategy {
 
     @Override
     public void procesarPago(Pago pago, Cliente cliente) {
-        // Solo actualizamos el estado del cliente para el día
+        // Lógica simple: Solo actualizamos el estado del cliente para hoy
         cliente.setTipoCliente("DIARIO");
         clienteRepositorio.save(cliente);
     }
