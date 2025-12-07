@@ -8,7 +8,7 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class QrCodeGenerator {
+public class QRCodeGenerator {
 
     /**
      * Genera una imagen QR en formato PNG a partir de un texto.

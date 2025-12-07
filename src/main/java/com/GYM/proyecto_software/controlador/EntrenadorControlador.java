@@ -3,11 +3,10 @@ package com.GYM.proyecto_software.controlador;
 import com.GYM.proyecto_software.modelo.Entrenador;
 import com.GYM.proyecto_software.repositorio.EntrenadorRepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/entrenadores")
@@ -17,6 +16,9 @@ public class EntrenadorControlador {
     @Autowired
     private EntrenadorRepositorio entrenadorRepositorio;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder; // Inyección para encriptar
+
     @GetMapping
     public List<Entrenador> getAllEntrenadores() {
         return entrenadorRepositorio.findAll();
@@ -24,18 +26,14 @@ public class EntrenadorControlador {
 
     @PostMapping
     public Entrenador createEntrenador(@RequestBody Entrenador entrenador) {
+        // 1. Encriptar contraseña
+        if (entrenador.getPassword() != null && !entrenador.getPassword().isEmpty()) {
+            entrenador.setPassword(passwordEncoder.encode(entrenador.getPassword()));
+        }
+
+        // 2. Asignar Rol
+        entrenador.setRol("ENTRENADOR");
+
         return entrenadorRepositorio.save(entrenador);
-    }
-
-
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales) {
-        String email = credenciales.get("email");
-        String password = credenciales.get("password");
-
-        return entrenadorRepositorio.findByEmail(email)
-                .filter(e -> e.getPassword() != null && e.getPassword().equals(password))
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(401).build());
     }
 }

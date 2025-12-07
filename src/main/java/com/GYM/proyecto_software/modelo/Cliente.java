@@ -23,9 +23,7 @@ public class Cliente {
     @Column(nullable = false, unique = true)
     private String email;
 
-    // --- NUEVO CAMPO ---
     private String password;
-    // -------------------
 
     private String telefono;
 
@@ -34,6 +32,8 @@ public class Cliente {
 
     @Column(name = "qr_code", unique = true)
     private String qrCode;
+
+    private String rol;
 
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
     private List<Suscripcion> suscripciones;
