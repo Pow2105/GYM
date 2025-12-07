@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/pagos")
@@ -31,11 +32,11 @@ public class PagoControlador {
     @Transactional
     public Pago registrarPago(@RequestBody PagoRequerido request) {
 
-        // 1. Validar Cliente
+
         Cliente cliente = clienteRepositorio.findById(request.getIdCliente())
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
 
-        // 2. Crear objeto Pago base
+
         Pago pago = new Pago();
         pago.setCliente(cliente);
         pago.setMonto(request.getMonto());
@@ -44,9 +45,14 @@ public class PagoControlador {
 
 
         PagoStrategy estrategia = strategyFactory.obtenerEstrategia(request.getConcepto());
-
         estrategia.procesarPago(pago, cliente, request);
 
         return pagoRepositorio.save(pago);
+    }
+
+
+    @GetMapping("/cliente/{idCliente}")
+    public List<Pago> obtenerPagosPorCliente(@PathVariable Long idCliente) {
+        return pagoRepositorio.findByCliente_IdCliente(idCliente);
     }
 }

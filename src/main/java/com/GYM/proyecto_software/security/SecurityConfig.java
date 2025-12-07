@@ -13,6 +13,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
@@ -28,17 +33,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Desactivar CSRF para API REST
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        // Rutas Públicas (Login, Registro, QR, Home)
+                        // Rutas Públicas
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/clientes").permitAll() // Registro clientes
-                        .requestMatchers("/api/asistencias/ocupacion").permitAll() // Home público
-                        .requestMatchers("/api/clientes/*/qr").permitAll() // Ver QR
-                        // Rutas Privadas por Rol
+                        .requestMatchers(HttpMethod.POST, "/api/clientes").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/administradores/registro").permitAll()
+                        .requestMatchers("/api/asistencias/ocupacion").permitAll()
+                        .requestMatchers("/api/clientes/*/qr").permitAll()
+                        // Rutas Privadas
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/entrenadores/**").hasAnyRole("ADMIN", "ENTRENADOR")
-                        // Cualquier otra requiere autenticación
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -46,6 +52,19 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+        @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Tu puerto de Vue
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     @Bean
@@ -57,7 +76,6 @@ public class SecurityConfig {
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
-
         return authProvider;
     }
 
