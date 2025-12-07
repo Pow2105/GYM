@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List; // <--- Importante: Agregado para que funcione la lista
 
 @RestController
 @RequestMapping("/api/pagos")
@@ -27,6 +28,7 @@ public class PagoControlador {
     @Autowired
     private PagoStrategyFactory strategyFactory;
 
+    // Endpoint para registrar un pago (Ya lo tenías)
     @PostMapping
     @Transactional
     public Pago registrarPago(@RequestBody PagoRequerido request) {
@@ -42,10 +44,16 @@ public class PagoControlador {
         pago.setConcepto(request.getConcepto());
         pago.setFecha(LocalDate.now());
 
-
+        // 3. Aplicar Estrategia (Diario, Mensual, Extra)
         PagoStrategy estrategia = strategyFactory.obtenerEstrategia(request.getConcepto());
         estrategia.procesarPago(pago, cliente, request);
 
         return pagoRepositorio.save(pago);
+    }
+
+
+    @GetMapping("/cliente/{idCliente}")
+    public List<Pago> obtenerPagosPorCliente(@PathVariable Long idCliente) {
+        return pagoRepositorio.findByCliente_IdCliente(idCliente);
     }
 }
