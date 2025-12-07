@@ -1,5 +1,6 @@
 package com.GYM.proyecto_software.modelo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore; // <--- IMPORTANTE: Agrega esto
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,6 +36,7 @@ public class Cliente {
 
     private String rol;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
     private List<Suscripcion> suscripciones;
 }
