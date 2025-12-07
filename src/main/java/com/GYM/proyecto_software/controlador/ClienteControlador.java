@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -26,7 +27,6 @@ public class ClienteControlador {
 
     @PostMapping
     public Cliente createCliente(@RequestBody Cliente cliente) {
-        // Generar UUID si no viene uno (esto es el "texto" único del QR)
         if (cliente.getQrCode() == null || cliente.getQrCode().isEmpty()) {
             cliente.setQrCode(UUID.randomUUID().toString());
         }
@@ -47,12 +47,24 @@ public class ClienteControlador {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // --- NUEVO ENDPOINT PARA GENERAR LA IMAGEN QR ---
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales) {
+        String email = credenciales.get("email");
+        String password = credenciales.get("password");
+
+        return clienteRepositorio.findByEmail(email)
+                .filter(c -> c.getPassword() != null && c.getPassword().equals(password))
+                .map(cliente -> {
+                    // Retornamos el cliente completo
+                    return ResponseEntity.ok(cliente);
+                })
+                .orElse(ResponseEntity.status(401).build());
+    }
+
     @GetMapping(value = "/{id}/qr", produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<byte[]> getClienteQrImage(@PathVariable Long id) {
         return clienteRepositorio.findById(id)
                 .map(cliente -> {
-                    // Generamos la imagen de 300x300 pixeles usando el UUID del cliente
                     byte[] imagenQr = QrCodeGenerator.getQRCodeImage(cliente.getQrCode(), 300, 300);
                     return ResponseEntity.ok().body(imagenQr);
                 })

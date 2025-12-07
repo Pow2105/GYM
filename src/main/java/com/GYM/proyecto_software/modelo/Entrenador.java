@@ -15,4 +15,7 @@ public class Entrenador {
     private String nombre;
     private String especialidad;
     private String disponibilidad;
+    @Column(unique = true)
+    private String email;
+    private String password;
 }

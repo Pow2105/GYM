@@ -23,6 +23,10 @@ public class Cliente {
     @Column(nullable = false, unique = true)
     private String email;
 
+    // --- NUEVO CAMPO ---
+    private String password;
+    // -------------------
+
     private String telefono;
 
     @Column(name = "tipo_cliente", nullable = false)
