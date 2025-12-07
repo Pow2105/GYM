@@ -15,20 +15,24 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
+    // Llave fija
     private static final String SECRET_STRING = "esta_es_una_clave_muy_secreta_y_larga_para_el_proyecto_gym_2025";
-
-
     private final Key key = Keys.hmacShaKeyFor(SECRET_STRING.getBytes(StandardCharsets.UTF_8));
 
     private final long EXPIRATION_TIME = 1000 * 60 * 60 * 10; // 10 horas
 
+    public JwtUtil() {
+        // Esto saldrá en la consola al arrancar. Si no sale, ¡el código viejo sigue corriendo!
+        System.out.println("🔓 JWT UTIL INICIADO CON LLAVE FIJA: " + SECRET_STRING.substring(0, 5) + "...");
+    }
+
     public String generateToken(String username, String role) {
         return Jwts.builder()
                 .setSubject(username)
-                .claim("rol", role) // Guardamos el rol en el token
+                .claim("rol", role)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(key, SignatureAlgorithm.HS256) // Firmamos con la llave fija
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -50,6 +54,9 @@ public class JwtUtil {
             final String username = extractUsername(token);
             return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
         } catch (Exception e) {
+            // --- AQUÍ ESTÁ EL CHIVATO ---
+            System.out.println("❌ ERROR VALIDANDO TOKEN: " + e.getMessage());
+            e.printStackTrace(); // Imprime todo el error para ver si es firma, expiración, etc.
             return false;
         }
     }

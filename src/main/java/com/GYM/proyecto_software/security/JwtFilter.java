@@ -28,22 +28,32 @@ public class JwtFilter extends OncePerRequestFilter {
         String username = null;
         String jwt = null;
 
+        // 1. Verificamos si viene el token
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7);
             try {
                 username = jwtUtil.extractUsername(jwt);
             } catch (Exception e) {
-                System.out.println("Error JWT: " + e.getMessage());
+                // ESTO ES LO QUE NECESITAMOS VER EN LA CONSOLA NEGRA DEL SERVIDOR
+                System.out.println("❌ [FILTRO JWT] Error al leer token: " + e.getMessage());
             }
+        } else {
+            // Depuración para ver si llega el header (Opcional, puede llenar mucho la consola)
+            // System.out.println("⚠️ [FILTRO JWT] Petición sin token a: " + request.getRequestURI());
         }
 
+        // 2. Si hay usuario y no está autenticado en el contexto
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
             if (jwtUtil.validateToken(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+                // System.out.println("✅ [FILTRO JWT] Acceso concedido a: " + username);
+            } else {
+                System.out.println("⛔ [FILTRO JWT] Token inválido para usuario: " + username);
             }
         }
         chain.doFilter(request, response);
