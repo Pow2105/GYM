@@ -22,10 +22,11 @@ public class PagoMensualStrategy implements PagoStrategy {
 
     @Override
     public void procesarPago(Pago pago, Cliente cliente, PagoRequerido request) {
+        // 1. Crear la suscripción de 30 días
         Suscripcion suscripcion = new Suscripcion();
         suscripcion.setCliente(cliente);
         suscripcion.setFechaInicio(LocalDate.now());
-        suscripcion.setFechaFin(LocalDate.now().plusDays(30));
+        suscripcion.setFechaFin(LocalDate.now().plusDays(30)); // Sumamos el mes
         suscripcion.setEstado("ACTIVA");
         suscripcion = suscripcionRepositorio.save(suscripcion);
 

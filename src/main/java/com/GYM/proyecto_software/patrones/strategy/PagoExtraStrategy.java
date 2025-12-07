@@ -40,6 +40,6 @@ public class PagoExtraStrategy implements PagoStrategy {
         usoExtra.setCostoExtra(request.getMonto());
 
         usoMaquinaExtraRepositorio.save(usoExtra);
-
+        
     }
 }
