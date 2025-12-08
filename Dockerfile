@@ -1,13 +1,21 @@
-# 1. Construcción: Usa la imagen de Maven para compilar el código.
-FROM maven:3.9.6-eclipse-temurin-17 AS build
-# Copia todo el contenido del contexto de la carpeta al contenedor.
+# Stage 1: Build the application
+# Usamos una imagen de Java/Maven más estable (focal) para la fase de construcción
+FROM eclipse-temurin:17-jdk-focal AS build
+
+# Copiamos todo el proyecto al directorio de trabajo del contenedor
 COPY . .
-# Ejecuta la compilación de Maven.
+
+# Compilar y empaquetar
+# Esta es la línea que está fallando. Si pom.xml tiene el repositorio, ahora debería pasar.
 RUN mvn clean package -DskipTests
 
-# 2. Ejecución: Usa una imagen más ligera (solo JRE) para ejecutar la app.
-FROM eclipse-temurin:17-jdk-alpine
-# Copia el archivo JAR compilado desde la etapa 'build' a la etapa 'run'.
+# Stage 2: Run the application
+# Usamos una imagen de solo Java Runtime Environment (JRE) más ligera para producción
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+
+# Copiar el JAR compilado (revisa que el nombre sea correcto)
 COPY --from=build /target/proyecto-software-0.0.1-SNAPSHOT.jar app.jar
-# Define el comando de inicio.
-ENTRYPOINT ["java","-jar","/app.jar"]
+
+# Ejecutar el JAR
+ENTRYPOINT ["java","-jar","/app/app.jar"]
