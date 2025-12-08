@@ -1,4 +1,4 @@
-package com.GYM.proyecto_software.config;
+package com.GYM.proyecto_software;
 
 import com.GYM.proyecto_software.modelo.Administrador;
 import com.GYM.proyecto_software.modelo.Entrenador;
