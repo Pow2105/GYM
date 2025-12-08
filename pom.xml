@@ -5,8 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.0</version> <relativePath/>
-    </parent>
+        <version>4.0.0</version> <relativePath/> </parent>
     <groupId>com.GYM</groupId>
     <artifactId>proyecto-software</artifactId>
     <version>0.0.1-SNAPSHOT</version>
@@ -107,6 +106,17 @@
         </dependency>
     </dependencies>
 
+    <repositories>
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <build>
         <plugins>
             <plugin>
@@ -135,5 +145,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
